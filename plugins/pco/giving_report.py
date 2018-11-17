@@ -30,7 +30,6 @@ def get_giving(report_date=None):
     msg = "Giving Since: %s" % report_date + "\n"
     for donation in pco.giving.donations.list(where={"[created_at][gte]": report_date},
                                               include={'designations, labels'}):
-        print(donation.fee_cents)
 
         if donation.payment_method == 'ach' or donation.payment_method == 'card':
             online_giving += donation.amount_cents

@@ -64,4 +64,4 @@ def get_giving(report_date="Last Monday"):
 if __name__ == '__main__':
     x = get_giving()
     for attachment in x:
-        print(attachment.txt())
+        print(attachment.slack())

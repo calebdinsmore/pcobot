@@ -9,9 +9,8 @@ pco = pypco.PCO(os.environ["WILL_PCO_APPLICATION_KEY"], os.environ["WILL_PCO_API
 # Apps: services, people, accounts, resources, check-ins, registrations, giving
 # You should call this before accessing sensitive Planning Center Information
 def get(message, app):
-    try:
-        fl_name = {'first_name': message.sender['source']['real_name'].split()[0],
-                   'last_name': message.sender['source']['real_name'].split()[1]}
+    fl_name = _check_name(message)
+    if fl_name:
         app = app.lower().strip()
         for x in pco.people.people.list(where=fl_name):
             for email in x.rel.emails.list():
@@ -19,42 +18,66 @@ def get(message, app):
                     for apps in x.rel.apps.list():
                         if app in apps.name.lower():
                             return True
-                            print("TRUE")
-        return False
-    except IndexError:
-        return False
+    return False
 
 
+# Will Depreciate redundant method
 def check_name(message):
-    print("Checking Slack name for First Last name:")
-    print(message.sender['source']['real_name'])
     try:
-        fl_name = (message.sender['source']['real_name'].split()[0], message.sender['source']['real_name'].split()[1])
-        print(fl_name)
+        if len(message.sender['source']['real_name'].split()) == 2:
+            fl_name = {'first_name': message.sender['source']['real_name'].split()[0],
+                       'last_name': message.sender['source']['real_name'].split()[1]}
+        elif len(message.sender['source']['real_name'].split()) == 3:
+            fl_name = {'first_name': message.sender['source']['real_name'].split()[0],
+                       'middle_name': message.sender['source']['real_name'].split()[1],
+                       'last_name': message.sender['source']['real_name'].split()[2]}
     except IndexError:
-        print(message.sender['source']['real_name'])
+        return False
+    except NameError:
         return False
     return True
 
 
+def _check_name(message):
+    try:
+        if len(message.sender['source']['real_name'].split()) == 2:
+            fl_name = {'first_name': message.sender['source']['real_name'].split()[0],
+                       'last_name': message.sender['source']['real_name'].split()[1]}
+        elif len(message.sender['source']['real_name'].split()) == 3:
+            fl_name = {'first_name': message.sender['source']['real_name'].split()[0],
+                       'middle_name': message.sender['source']['real_name'].split()[1],
+                       'last_name': message.sender['source']['real_name'].split()[2]}
+    except IndexError:
+        return False
+    except NameError:
+        return False
+    return fl_name
+
+
 def get_apps(message):
-    fl_name = {'first_name': message.sender['source']['real_name'].split()[0],
-               'last_name': message.sender['source']['real_name'].split()[1]}
-    app_list = ""
-    pcoaddress = ""
-    for x in pco.people.people.list(where=fl_name):
-        pcoaddress = "https://people.planningcenteronline.com/people/" + x.id
-        for apps in x.rel.apps.list():
-            app_list += "\n" + apps.name
-    print(app_list)
-    if app_list is "":
-        print("else")
+
+    fl_name = _check_name(message)
+    if fl_name:
+        app_list = ""
+        pcoaddress = ""
+        for x in pco.people.people.list(where=fl_name):
+            pcoaddress = "https://people.planningcenteronline.com/people/" + x.id
+            for apps in x.rel.apps.list():
+                app_list += "\n" + apps.name
+        if app_list is "":
+            pcoaddress = ("https://people.planningcenteronline.com/people?q=" + "%20".join([fl_name['first_name' ''],
+                                                                                            fl_name['last_name' '']]))
+            app_list = "Whoops! Something went wrong. I couldn't find your permissions. Please check that your Slack" \
+                       "profile 'Full Name' matches your Planning Center Profile. "
+        attachment = msg_attachment.SlackAttachment(fallback=app_list, text=app_list,
+                                                    button_text="Open in People", button_url=pcoaddress)
+        return attachment
+    else:
         pcoaddress = ("https://people.planningcenteronline.com/people?q=" + "%20".join([fl_name['first_name' ''],
                                                                                         fl_name['last_name' '']]))
         app_list = "Whoops! Something went wrong. I couldn't find your permissions."
-    attachment = msg_attachment.SlackAttachment(fallback=app_list, text=app_list,
-                                                button_text="Open in People", button_url=pcoaddress)
-    return attachment
+        attachment = msg_attachment.SlackAttachment(fallback=app_list, text=app_list,
+                                                    button_text="Open in People", button_url=pcoaddress)
 
 
 if __name__ == '__main__':

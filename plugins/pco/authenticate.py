@@ -1,6 +1,8 @@
 import pypco
 import os
 from plugins.pco import msg_attachment
+from will.mixins.slackwhitelist import wl_chan_id
+
 
 pco = pypco.PCO(os.environ["WILL_PCO_APPLICATION_KEY"], os.environ["WILL_PCO_API_SECRET"])
 
@@ -8,16 +10,17 @@ pco = pypco.PCO(os.environ["WILL_PCO_APPLICATION_KEY"], os.environ["WILL_PCO_API
 # This checks to see if the credentials {"name": "", "email": ""} have access to the app
 # Apps: services, people, accounts, resources, check-ins, registrations, giving
 # You should call this before accessing sensitive Planning Center Information
-def get(message, app):
-    fl_name = _check_name(message)
-    if fl_name:
-        app = app.lower().strip()
-        for x in pco.people.people.list(where=fl_name):
-            for email in x.rel.emails.list():
-                if message.sender['source']['email'] in email.address:
-                    for apps in x.rel.apps.list():
-                        if app in apps.name.lower():
-                            return True
+def get(message, app, will):
+    fl_name = message.sender['source']['real_name']
+    app = app.lower().strip()
+    for x in pco.people.people.list(search_name=fl_name):
+        for email in x.rel.emails.list():
+            if message.sender['source']['email'] in email.address:
+                for apps in x.rel.apps.list():
+                    if app in apps.name.lower():
+                        return True
+    will.say("Sorry but you don't have access to the People App. Check that your slack Real Name matches your"
+             "Planning Center Name or please contact your administrator.", channel=wl_chan_id(will))
     return False
 
 
@@ -38,29 +41,12 @@ def check_name(message):
     return True
 
 
-def _check_name(message):
-    try:
-        if len(message.sender['source']['real_name'].split()) == 2:
-            fl_name = {'first_name': message.sender['source']['real_name'].split()[0],
-                       'last_name': message.sender['source']['real_name'].split()[1]}
-        elif len(message.sender['source']['real_name'].split()) == 3:
-            fl_name = {'first_name': message.sender['source']['real_name'].split()[0],
-                       'middle_name': message.sender['source']['real_name'].split()[1],
-                       'last_name': message.sender['source']['real_name'].split()[2]}
-    except IndexError:
-        return False
-    except NameError:
-        return False
-    return fl_name
-
-
 def get_apps(message):
-
-    fl_name = _check_name(message)
+    fl_name = message.sender['source']['real_name']
     if fl_name:
         app_list = ""
         pcoaddress = ""
-        for x in pco.people.people.list(where=fl_name):
+        for x in pco.people.people.list(search_name=fl_name):
             pcoaddress = "https://people.planningcenteronline.com/people/" + x.id
             for apps in x.rel.apps.list():
                 app_list += "\n" + apps.name

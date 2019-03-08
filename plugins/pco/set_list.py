@@ -42,7 +42,7 @@ def get(set_date="sunday"):
                                 else:
                                     set_list = "\n".join([set_list, "• " + items.title])
                                 if set_list == set_date:
-                                    set_list = "Sorry, I couldn't fine a plan for that date ¯\_(ツ)_/¯"
+                                    set_list = "Sorry, I couldn't find a plan for that date ¯\_(ツ)_/¯"
                             if set_list is not set_date:
                                 attachment_list.append(msg_attachment.
                                                        SlackAttachment(fallback=set_list,
@@ -68,7 +68,7 @@ def get(set_date="sunday"):
                         else:
                             set_list = "\n".join([set_list, "• " + items.title])
                         if set_list == set_date:
-                            set_list = "Sorry, I couldn't fine a plan for that date ¯\_(ツ)_/¯"
+                            set_list = "Sorry, I couldn't find a plan for that date ¯\_(ツ)_/¯"
                     if set_list is not set_date:
                         attachment_list.append(msg_attachment.
                                                SlackAttachment(fallback=set_list,

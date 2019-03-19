@@ -67,6 +67,17 @@ class PcoServicesPlugin(WillPlugin):
         else:
             self.say("", message=message, attachments=attachment, channel=wl_chan_id(self))
 
+    @respond_to("(who is scheduled on the )(?P<pco_team>[\w\s]+) team (?P<pco_date>.*?(?=(?:\'|\?)|$))\??")
+    def pco_team_schedule_lookup(self, message, pco_team, pco_date):
+        """Lookup a [team] and display its confirmed and unconfirmed members for a given date"""
+        pco_team = pco_team.strip()
+        self.reply("Hold on; I'll look up that team's schedule for you.")
+        attachments = teams.get_for_date(pco_team, pco_date)
+        attachment = []
+        for returned_attachment in attachments:
+            attachment += returned_attachment.slack()
+        self.say("", message=message, attachments=attachment, channel=wl_chan_id(self))
+
 
 # Test your setup by running this file.
 # If you add functions in this file please add a test below.

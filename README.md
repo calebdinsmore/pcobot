@@ -44,7 +44,8 @@ If no app name is provided it will list all the apps you can access.
 * ```Show the set list for *[Any future service date]*```
 * ```Show the set list for *[Any future service date]*```
 * ```What is the arrangement for [Any Song]?```
-*'''who is scheduled on the *[Any Services team]* team on *[Any future day/date]* at *[6PM]*?
+* ```Who is scheduled on the *[Any Services team]* team on *[Any future day/date]* at *[6PM]*?```
+
 If you specify a time, it will try to find the team for that precise service time—if you do not, it will simply try to match the team for the day provided.
 
 #### Access Control Lists

@@ -100,11 +100,30 @@ To change the access control list, see configuration instructions below and this
 ## Installation
 ----------------------------------
 
-
 ### Install on Heroku
 Click the button!
 
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+
+If everything goes well, you will have your own instance of pcobot running.
+
+Update existing One-Click Heroku Deployment
+Prepare for updates:
+
+#### create local repo pointing to the Heroku remote
+`heroku git:clone --app YOUR_HEROKU_APPNAME && cd YOUR_HEROKU_APPNAME`
+It may tell you that you've cloned an empty repository. That is fine. 
+
+#### attach the GitHub repository of pcobot as a new remote
+`git remote add origin https://github.com/pastorhudson/pcobot`
+
+From now on you can simply update your Heroku instance by running:
+```
+cd YOUR_HEROKU_APPNAME
+git pull origin master # pull down the latest version from GitHub
+
+git push heroku master # push all updates back to your Heroku app instance
+```
 
 ### Install on Linux 
 *(example code assumes Debian - including Ubuntu, Mint, KNOPPIX, Raspbian)*
@@ -141,12 +160,16 @@ You'll need to invite the bot to any channel you want it to post.
 
 * :lock:```!toggle``` Responds with a list of the current announcement toggles.
 * :lock:```!toggle <announcement name>``` Turns announcements on and off.
+* :lock:```!twipe``` Clears and revitalizes the announcement toggles. Use this after you upgrade if you are missing new toggles.
+
+
 
 #### WebHooks
 Some announcements like "New Person Created" need to have Planning Center webhooks configured.
 
 Current webhooks PCObot will need:
 * people.v2.events.person.created (Needed for "New Person Created Announcement")
+* services.v2.events.plan.live.updated (Needed for "Live Service Update Announcement")
 
 ##### Create the webhook:
 * [Open PCO Webhooks](https://api.planningcenteronline.com/webhooks#/)
